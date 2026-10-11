@@ -2,9 +2,14 @@ import os
 import sqlite3
 import requests
 from flask import Flask, render_template, request, jsonify
+from groq import Groq
 
 app = Flask(__name__)
 DB_FILE = "pantry.db"
+
+# Initialize the Groq client using an environment variable
+# (You will paste your secret GROQ_API_KEY securely inside the Render dashboard)
+groq_client = Groq(api_key=os.environ.get("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"))
 
 def init_db():
     with sqlite3.connect(DB_FILE) as conn:
@@ -74,18 +79,33 @@ def manage_pantry():
 
 @app.route('/api/generate-recipes', methods=['POST'])
 def generate_recipes():
-    # Mock AI Chef Logic (Simulates an LLM recipe response without needing an API key upfront)
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT item_name FROM pantry")
         items = [row[0] for row in cursor.fetchall()]
     
     if not items:
-        return jsonify({"recipes": "Your pantry is empty! Scan some items first."})
+        return jsonify({"recipes": "Your pantry is empty! Scan or type some items first."})
         
     ingredients = ", ".join(items)
-    mock_ai_response = f"### AI Chef Suggestion\nBased on your pantry ingredients (**{ingredients}**), here is a quick meal idea:\n\n1. **Pantry Skillet Stir-fry**: Toss your items together in a hot pan with olive oil, salt, and pepper. Cook for 5-7 minutes until hot and serve warm!"
-    return jsonify({"recipes": mock_ai_response})
+    
+    try:
+        # Call Meta's Llama 3 model via Groq's super-fast free tier
+        completion = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Act as a creative chef. Look at these pantry ingredients: {ingredients}. Generate 2 unique, realistic recipes I can make using these items. Keep instructions brief and punchy."
+                }
+            ],
+            temperature=0.7,
+            max_tokens=500
+        )
+        ai_response = completion.choices.message.content
+        return jsonify({"recipes": ai_response})
+    except Exception as e:
+        return jsonify({"recipes": f"AI Chef went on strike: Ensure your GROQ_API_KEY is configured in Render. (Error: {str(e)})"})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
