@@ -3,170 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pantry Chef App</title>
+    <title>PantryChef v2</title>
     <script src="https://jsdelivr.net"></script>
     <script src="https://unpkg.com"></script>
     <style>
-        body { -webkit-tap-highlight-color: transparent; background-color: #f9fafb; }
-        .recipe-output p { margin-bottom: 0.5rem; line-height: 1.4; }
+        body { -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .laser-glow { box-shadow: 0 0 12px rgba(239, 68, 68, 0.8); }
+        .app-gradient { background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%); }
     </style>
 </head>
-<body class="min-h-screen text-gray-900 antialiased pb-24">
-    <header class="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3.5 flex items-center justify-between shadow-sm">
-        <div class="flex items-center space-x-2.5">
-            <div class="h-9 w-9 bg-gradient-to-tr from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md">
-                <span class="text-sm font-black">PC</span>
+<body class="app-gradient min-h-screen text-gray-900 antialiased pb-12">
+
+    <!-- Top Persistent Yuka-Style Header -->
+    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="h-9 w-9 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-md">
+                <span class="text-sm font-black">🥕</span>
             </div>
             <div>
-                <h1 class="text-sm font-extrabold tracking-tight text-gray-900">PantryChef</h1>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">AI Assistant v2.0</p>
+                <h1 class="text-sm font-black tracking-tight text-gray-900">PantryChef Pro</h1>
+                <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-wider">ZXing Smart Scanner</p>
             </div>
         </div>
-        <div class="flex items-center space-x-2">
-            <span id="status-dot" class="h-2 w-2 rounded-full bg-green-500"></span>
-            <span id="status-text" class="text-xs font-bold text-green-500 uppercase tracking-wide">Connected</span>
+        <div class="flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-100">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Engine Ready</span>
         </div>
     </header>
 
     <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
-        <section class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="p-4 border-b border-gray-50 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <span class="text-base">📸</span>
-                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-gray-500">Live Lens Viewfinder</h2>
-                </div>
-                <button onclick="pantryApp.toggleCamera()" id="cam-action-btn" class="bg-green-500 hover:bg-green-600 text-white font-extrabold text-[11px] uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm transition">
-                    Turn On Camera
-                </button>
-            </div>
-            <div class="bg-gray-950 relative aspect-video flex items-center justify-center overflow-hidden">
-                <div id="reader" class="w-full h-full object-cover"></div>
-                <div id="cam-cover" class="absolute inset-0 z-20 bg-gray-900 flex flex-col items-center justify-center p-6 text-center space-y-2">
-                    <div class="h-10 w-10 bg-gray-800 rounded-xl flex items-center justify-center text-lg text-gray-400">📷</div>
-                    <p class="text-xs font-bold text-gray-200">Camera Lens Standby</p>
-                    <p class="text-[10px] text-gray-400 max-w-[220px]">Ensure your hosting domain uses secure HTTPS transmission lines to open camera assets.</p>
-                </div>
-            </div>
-            <div id="scan-result" class="bg-gray-50 px-4 py-2.5 text-center text-xs font-bold text-gray-500 border-t border-gray-50">
-                Awaiting active scan target initialization...
-            </div>
-        </section>
-
-        <section class="bg-white rounded-2xl p-2.5 border border-gray-100 shadow-sm flex items-center space-x-2">
-            <input id="manual-input" type="text" placeholder="Type items manually (e.g. Rice, Onion)..." class="flex-1 bg-transparent px-2 py-1 text-xs font-semibold text-gray-800 placeholder-gray-400 focus:outline-none">
-            <button onclick="pantryApp.addManual()" class="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-xl transition">Add</button>
-        </section>
-
-        <section class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+        <!-- 1. Live Camera Lens Viewfinder Card -->
+        <section class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden p-4 space-y-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <span class="text-base">📋</span>
-                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-gray-500">Current Stock</h2>
+                    <span class="text-base">🎯</span>
+                    <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">Aim & Scan</h2>
                 </div>
-                <span id="inventory-count" class="bg-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">0 items</span>
+                <button onclick="pantryApp.startScan()" id="cam-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[11px] uppercase tracking-widest px-4 py-2 rounded-xl shadow-md transition">
+                    Start Scanner
+                </button>
             </div>
-            <ul id="pantry-list" class="divide-y divide-gray-50 max-h-48 overflow-y-auto"></ul>
+
+            <div class="bg-gray-900 rounded-2xl relative aspect-video flex items-center justify-center overflow-hidden shadow-inner">
+                <video id="video-stream" class="w-full h-full object-cover"></video>
+                <div id="video-mask" class="absolute inset-0 z-20 bg-gray-900 flex flex-col items-center justify-center p-6 text-center space-y-2">
+                    <div class="h-11 w-11 bg-gray-800 rounded-2xl flex items-center justify-center text-xl text-gray-400">📸</div>
+                    <p class="text-xs font-bold text-gray-200">Camera Lens Idle</p>
+                    <p class="text-[10px] text-gray-500 max-w-[220px]">Click start to activate the physical scanner arrays over secure HTTPS links.</p>
+                </div>
+                <div id="laser-hud" class="absolute inset-x-0 top-1/2 h-[2px] bg-red-500 laser-glow z-10 hidden animate-pulse"></div>
+            </div>
+            
+            <div id="scan-feedback" class="bg-gray-50 px-3 py-2.5 text-center text-[11px] font-bold text-gray-500 rounded-xl border border-gray-100">
+                Awaiting target barcode alignment...
+            </div>
         </section>
 
+        <!-- 2. Manual Keyboard Entry Row -->
+        <section class="bg-white rounded-2xl p-2 border border-gray-100 shadow-sm flex items-center space-x-2">
+            <div class="p-2 text-sm text-gray-400">🔍</div>
+            <input id="manual-text" type="text" placeholder="Can't scan? Type product name manually..." class="flex-1 bg-transparent px-1 py-1 text-xs font-semibold text-gray-800 placeholder-gray-400 focus:outline-none">
+            <button onclick="pantryApp.addManualItem()" class="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">Add</button>
+        </section>
+
+        <!-- 3. Current Stock Tracking List -->
+        <section class="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm">📋</span>
+                    <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">My Scanned Items</h2>
+                </div>
+                <span id="stock-count" class="bg-gray-100 text-gray-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">0 items</span>
+            </div>
+            <ul id="stock-list" class="divide-y divide-gray-100 max-h-48 overflow-y-auto"></ul>
+        </section>
+
+        <!-- 4. AI Recipe Panel -->
         <section class="space-y-3">
-            <button onclick="pantryApp.askChef()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3.5 rounded-2xl font-black text-sm shadow-md tracking-wide transition transform active:scale-98 flex items-center justify-center space-x-2">
+            <button onclick="pantryApp.askChefForMeals()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg tracking-wide transition flex items-center justify-center space-x-2">
                 <span>✨</span>
-                <span>Generate AI Chef Recipes</span>
+                <span>Ask AI Chef for Recipes</span>
             </button>
-            <div id="ai-recipes" class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hidden text-xs leading-relaxed text-gray-700"></div>
+            <div id="recipe-box" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hidden text-xs leading-relaxed text-gray-700 space-y-2"></div>
         </section>
     </main>
 
-    <script>
-        var html5QrCode = null;
-        var pantryApp = {
-            toggleCamera: function() {
-                var btn = document.getElementById('cam-action-btn');
-                var cvr = document.getElementById('cam-cover');
-                if (!html5QrCode) { html5QrCode = new Html5Qrcode("reader"); }
-                if (html5QrCode.isScanning) {
-                    html5QrCode.stop().then(function() {
-                        btn.innerText = "Turn On Camera";
-                        cvr.classList.remove('hidden');
-                    });
-                } else {
-                    cvr.classList.add('hidden');
-                    btn.innerText = "Starting...";
-                    html5QrCode.start(
-                        { facingMode: "environment" }, 
-                        { fps: 20, qrbox: { width: 220, height: 120 } },
-                        pantryApp.onScan,
-                        pantryApp.onFail
-                    )
-                    .then(function() { btn.innerText = "Turn Off Camera"; })
-                    .catch(function(e) {
-                        cvr.classList.remove('hidden');
-                        btn.innerText = "Turn On Camera";
-                        alert("Camera stream offline: Secure HTTPS connection required.");
-                    });
-                }
-            },
-            onScan: function(txt, res) {
-                var box = document.getElementById('scan-result');
-                box.innerText = "🎯 Found Barcode! Processing catalog lookup...";
-                if (navigator.vibrate) navigator.vibrate(80);
-                fetch('/api/scan', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ barcode: txt })
-                })
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (d.item_name) {
-                        box.innerText = "✅ Added: " + d.item_name;
-                        pantryApp.load();
-                    } else {
-                        box.innerText = "⚠️ Product Unknown.";
-                    }
-                })
-                .catch(function(err) { box.innerText = "❌ Network connection mistake."; });
-            },
-            onFail: function(e) {},
-            load: function() {
-                fetch('/api/pantry')
-                .then(function(r) { return r.json(); })
-                .then(function(items) {
-                    var list = document.getElementById('pantry-list');
-                    document.getElementById('inventory-count').innerText = items.length + " items";
-                    if (items.length === 0) {
-                        list.innerHTML = '<div class="text-center py-4 text-gray-400 text-xs">Pantry is empty.</div>';
-                        return;
-                    }
-                    list.innerHTML = '';
-                    items.forEach(function(item) {
-                        list.innerHTML += '<li class="flex justify-between items-center py-2.5 text-xs font-semibold text-gray-800"><span>' + item.item_name + '</span><button onclick="pantryApp.remove(' + item.id + ')" class="text-gray-300 hover:text-red-500 font-bold p-1">✕</button></li>';
-                    });
-                });
-            },
-            addManual: function() {
-                var el = document.getElementById('manual-input');
-                if(!el.value) return;
-                fetch('/api/pantry', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ item_name: el.value }) })
-                .then(function() { el.value = ''; pantryApp.load(); });
-            },
-            remove: function(id) {
-                fetch('/api/pantry', { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id: id }) })
-                .then(function() { pantryApp.load(); });
-            },
-            askChef: function() {
-                var out = document.getElementById('ai-recipes');
-                out.classList.remove('hidden');
-                out.innerHTML = '<div class="animate-pulse text-green-600 font-bold text-xs">AI Chef is writing your recipes...</div>';
-                fetch('/api/generate-recipes', { method: 'POST' })
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    var raw = d.recipes || "Error creating recipes.";
-                    var formatted = raw.split('\n').join('<br>').split('**').join('');
-                    out.innerHTML = '<div class="recipe-output font-medium space-y-1">' + formatted + '</div>';
-                });
-            }
-        };
-        pantryApp.load();
-    </script>
+    <!-- Connects to your external script controller file directly -->
+    <script src="/static/js/app.js"></script>
 </body>
 </html>
