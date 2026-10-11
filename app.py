@@ -9,7 +9,15 @@ DB_FILE = "pantry.db"
 
 # Initialize the Groq client using an environment variable
 # (You will paste your secret GROQ_API_KEY securely inside the Render dashboard)
-groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+# Create an explicit custom http client wrapper to completely ignore the hidden proxy bug
+import httpx
+custom_http_client = httpx.Client(proxies=None) if hasattr(httpx, 'Client') else None
+
+groq_client = Groq(
+    api_key=os.environ.get("GROQ_API_KEY"),
+    http_client=custom_http_client
+)
+
 
 def init_db():
     with sqlite3.connect(DB_FILE) as conn:
