@@ -9,7 +9,7 @@ DB_FILE = "pantry.db"
 
 # Initialize the Groq client using an environment variable
 # (You will paste your secret GROQ_API_KEY securely inside the Render dashboard)
-groq_client = Groq(api_key=os.environ.get("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"))
+groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 def init_db():
     with sqlite3.connect(DB_FILE) as conn:
