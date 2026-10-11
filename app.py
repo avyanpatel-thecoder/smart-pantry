@@ -87,9 +87,9 @@ def generate_recipes():
     ingredients = ", ".join(items)
     
     try:
-        # Call Groq's updated standard model name
+        # Switched model string to Groq's active developer production model option
         completion = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-20b",
             messages=[
                 {
                     "role": "user",
