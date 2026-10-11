@@ -4,49 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Smart Pantry Dashboard</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://jsdelivr.net"></script>
-    <!-- Html5-Qrcode library for scanner mechanics -->
     <script src="https://unpkg.com"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
-        /* Custom scrollbar design for the inventory area */
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.03);
-            border-radius: 10px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.1);
-            border-radius: 10px;
-        }
+        .gradient-bg { background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen font-sans antialiased text-gray-800 pb-12">
     <div class="max-w-md mx-auto px-4 pt-6 space-y-6">
-        
-        <!-- Header Profile Branding -->
         <div class="flex items-center justify-between px-1">
             <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Welcome Back</span>
                 <h1 class="text-2xl font-black text-gray-900 tracking-tight">🧑‍🍳 AI Smart Pantry</h1>
             </div>
-            <div class="h-10 w-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                AI
-            </div>
+            <div class="h-10 w-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">AI</div>
         </div>
-        
-        <!-- Camera Scanner Component Frame -->
         <div class="glass-card rounded-2xl p-5 shadow-xl transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center space-x-2">
@@ -55,27 +31,21 @@
                 </div>
                 <span id="scan-status-badge" class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-yellow-200">Camera Idle</span>
             </div>
-            
-            <!-- Video Viewport Anchor Element -->
             <div class="overflow-hidden rounded-xl bg-black relative min-h-[200px] flex items-center justify-center shadow-inner">
                 <div id="reader" class="w-full"></div>
                 <div id="camera-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-center p-6 space-y-3 z-10">
                     <div class="p-3 bg-gray-800 rounded-full text-2xl">📷</div>
                     <p class="text-sm font-medium text-gray-300">Camera permissions or HTTPS connection needed to initialize viewer frame.</p>
-                    <button onclick="startLiveCameraEngine()" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition">Initialize Camera</button>
+                    <button onclick="pantryApp.startCamera()" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition">Initialize Camera</button>
                 </div>
             </div>
             <div id="scan-result" class="mt-3 text-center text-xs font-semibold text-gray-500 bg-gray-50 py-2 rounded-lg border border-gray-100">Awaiting target barcode alignment...</div>
         </div>
-
-        <!-- Manual Backup Input Card -->
         <div class="glass-card rounded-2xl p-4 shadow-md flex space-x-2 items-center">
             <div class="bg-gray-100 p-2 rounded-lg text-lg">✍️</div>
             <input id="manual-input" type="text" placeholder="Type items manually (e.g. Eggs, Milk)..." class="flex-1 bg-transparent px-2 py-1 text-sm border-none text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0">
-            <button onclick="addManualItem()" class="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition">Add</button>
+            <button onclick="pantryApp.addManual()" class="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition">Add</button>
         </div>
-
-        <!-- Inventory List Display Layout Container -->
         <div class="glass-card rounded-2xl p-5 shadow-lg">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center space-x-2">
@@ -86,107 +56,72 @@
             </div>
             <ul id="pantry-list" class="custom-scroll divide-y divide-gray-100 max-h-56 overflow-y-auto pr-1"></ul>
         </div>
-
-        <!-- AI Chef Action Output Panel -->
         <div class="space-y-3">
-            <button onclick="generateRecipes()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 rounded-2xl font-extrabold shadow-lg transition transform active:scale-98 flex items-center justify-center space-x-2 text-base">
+            <button onclick="pantryApp.askChef()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 rounded-2xl font-extrabold shadow-lg transition transform active:scale-98 flex items-center justify-center space-x-2 text-base">
                 <span>✨</span>
                 <span>Ask AI Chef for Recipes</span>
             </button>
             <div id="ai-recipes" class="glass-card border border-blue-200 rounded-2xl p-5 shadow-xl hidden text-sm leading-relaxed text-gray-700 bg-gradient-to-b from-white to-blue-50/30"></div>
         </div>
     </div>
-
     <script>
-        let html5QrcodeScanner = null;
-
-        function startLiveCameraEngine() {
-            document.getElementById('camera-placeholder').classList.add('hidden');
-            document.getElementById('scan-status-badge').className = "bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-200";
-            document.getElementById('scan-status-badge').innerText = "Camera Active";
-
-            if (!html5QrcodeScanner) {
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                    fps: 15, 
-                    qrbox: { width: 250, height: 150 },
-                    aspectRatio: 1.333334
-                });
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            }
-        }
-
-        function onScanSuccess(decodedText, decodedResult) {
-            // Flash indicator alert response
-            document.getElementById('scan-result').className = "mt-3 text-center text-xs font-bold text-green-600 bg-green-50 py-2 rounded-lg border border-green-200 animate-pulse";
-            document.getElementById('scan-result').innerText = "🎯 Captured target data: " + decodedText;
-            
-            // Native vibration haptic feedback confirmation loop
-            if (navigator.vibrate) navigator.vibrate(100);
-
-            fetch('/api/scan', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ barcode: decodedText })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.item_name) {
-                    loadPantry();
+        var html5QrcodeScanner = null;
+        var pantryApp = {
+            startCamera: function() {
+                document.getElementById('camera-placeholder').classList.add('hidden');
+                document.getElementById('scan-status-badge').className = "bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-200";
+                document.getElementById('scan-status-badge').innerText = "Camera Active";
+                if (!html5QrcodeScanner) {
+                    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: { width: 250, height: 150 }, aspectRatio: 1.333334 });
+                    html5QrcodeScanner.render(pantryApp.onScan, pantryApp.onFail);
                 }
-            })
-            .catch(err => console.log("Network intake failure"));
-        }
-
-        function onScanFailure(error) {
-            // Silently listen for camera boundary updates inside stream
-        }
-
-        function loadPantry() {
-            fetch('/api/pantry')
-            .then(res => res.json())
-            .then(items => {
-                const list = document.getElementById('pantry-list');
-                document.getElementById('inventory-count').innerText = `${items.length} items`;
-                
-                list.innerHTML = items.length === 0 ? 
-                    `<div class="text-center py-8 text-gray-400 text-sm flex flex-col items-center justify-center space-y-2">
-                        <span class="text-3xl">🏜️</span>
-                        <p class="font-medium text-xs">Your pantry shelf looks empty.</p>
-                     </div>` : '';
-                
-                items.forEach(item => {
-                    list.innerHTML += `
-                    <li class="flex justify-between items-center py-3 group animation-all duration-200">
-                        <div class="flex items-center space-x-3">
-                            <div class="h-2 w-2 rounded-full bg-green-500 group-hover:scale-125 transition"></div>
-                            <span class="text-sm font-semibold tracking-tight text-gray-900">${item.item_name}</span>
-                        </div>
-                        <button onclick="deleteItem(${item.id})" class="text-gray-300 hover:text-red-500 font-bold p-1 rounded-lg text-xs transition duration-150">✕</button>
-                    </li>`;
+            },
+            onScan: function(text, res) {
+                document.getElementById('scan-result').className = "mt-3 text-center text-xs font-bold text-green-600 bg-green-50 py-2 rounded-lg border border-green-200";
+                document.getElementById('scan-result').innerText = "🎯 Captured barcode: " + text;
+                if (navigator.vibrate) navigator.vibrate(100);
+                fetch('/api/scan', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ barcode: text }) })
+                .then(function(r) { return r.json(); })
+                .then(function(d) { if(d.item_name) { pantryApp.load(); } })
+                .catch(function(e) { console.log("error"); });
+            },
+            onFail: function(err) {},
+            load: function() {
+                fetch('/api/pantry')
+                .then(function(r) { return r.json(); })
+                .then(function(items) {
+                    var list = document.getElementById('pantry-list');
+                    document.getElementById('inventory-count').innerText = items.length + " items";
+                    list.innerHTML = items.length === 0 ? '<div class="text-center py-8 text-gray-400 text-sm flex flex-col items-center justify-center space-y-2"><span class="text-3xl">🏜️</span><p class="font-medium text-xs">Your pantry shelf looks empty.</p></div>' : '';
+                    items.forEach(function(item) {
+                        list.innerHTML += '<li class="flex justify-between items-center py-3 group"><div class="flex items-center space-x-3"><div class="h-2 w-2 rounded-full bg-green-500"></div><span class="text-sm font-semibold tracking-tight text-gray-900">' + item.item_name + '</span></div><button onclick="pantryApp.remove(' + item.id + ')" class="text-gray-300 hover:text-red-500 font-bold p-1 rounded-lg text-xs">✕</button></li>';
+                    });
                 });
-            });
-        }
-
-        function addManualItem() {
-            const input = document.getElementById('manual-input');
-            if(!input.value) return;
-            fetch('/api/pantry', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ item_name: input.value })
-            }).then(() => { input.value = ''; loadPantry(); });
-        }
-
-        function deleteItem(id) {
-            fetch('/api/pantry', {
-                method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: id })
-            }).then(() => loadPantry());
-        }
-
-        function generateRecipes() {
-            const output = document.getElementById('ai-recipes');
-            output.classList.remove('hidden');
-            output.innerHTML = `
-                <div class="flex items-center space-x-3 py-2 animate-pulse text-blue-600 font-medium text-xs">
+            },
+            addManual: function() {
+                var el = document.getElementById('manual-input');
+                if(!el.value) return;
+                fetch('/api/pantry', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ item_name: el.value }) })
+                .then(function() { el.value = ''; pantryApp.load(); });
+            },
+            remove: function(id) {
+                fetch('/api/pantry', { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id: id }) })
+                .then(function() { pantryApp.load(); });
+            },
+            askChef: function() {
+                var out = document.getElementById('ai-recipes');
+                out.classList.remove('hidden');
+                out.innerHTML = '<div class="flex items-center space-x-3 py-2 animate-pulse text-blue-600 font-medium text-xs"><div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div><span>AI Chef is composing recipes based on your ingredients...</span></div>';
+                fetch('/api/generate-recipes', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    var raw = d.recipes || "Error creating recipes.";
+                    var formatted = raw.split('**').join('');
+                    out.innerHTML = '<div class="prose prose-sm text-xs font-medium space-y-2">' + formatted + '</div>';
+                });
+            }
+        };
+        pantryApp.load();
+    </script>
+</body>
+</html>
