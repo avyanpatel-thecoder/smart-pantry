@@ -3,92 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PantryChef v2</title>
+    <title>PantryChef Pro</title>
     <script src="https://jsdelivr.net"></script>
     <script src="https://unpkg.com"></script>
     <style>
         body { -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .laser-glow { box-shadow: 0 0 12px rgba(239, 68, 68, 0.8); }
-        .app-gradient { background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%); }
+        .laser-glow { box-shadow: 0 0 16px rgba(16, 185, 129, 0.6); }
+        .app-gradient { background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%); }
     </style>
 </head>
 <body class="app-gradient min-h-screen text-gray-900 antialiased pb-12">
 
-    <!-- Top Persistent Yuka-Style Header -->
-    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between shadow-sm">
+    <!-- Premium Minimal App Header Banner -->
+    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm">
         <div class="flex items-center space-x-3">
             <div class="h-9 w-9 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-md">
-                <span class="text-sm font-black">🥕</span>
+                <span class="text-sm font-bold">🥕</span>
             </div>
             <div>
                 <h1 class="text-sm font-black tracking-tight text-gray-900">PantryChef Pro</h1>
-                <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-wider">ZXing Smart Scanner</p>
+                <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-wider">AI Intelligent Kitchen</p>
             </div>
         </div>
-        <div class="flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-100">
+        <div class="flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100">
             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Engine Ready</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Ready to Scan</span>
         </div>
     </header>
 
     <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
-        <!-- 1. Live Camera Lens Viewfinder Card -->
-        <section class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden p-4 space-y-3">
+        <!-- 1. Interactive Barcode Camera Card Frame Component -->
+        <section class="bg-white rounded-3xl border border-gray-100 shadow-md overflow-hidden p-5 space-y-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <span class="text-base">🎯</span>
                     <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">Aim & Scan</h2>
                 </div>
-                <button onclick="pantryApp.startScan()" id="cam-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[11px] uppercase tracking-widest px-4 py-2 rounded-xl shadow-md transition">
+                <button onclick="pantryApp.startScan()" id="cam-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-widest px-5 py-2.5 rounded-xl shadow-md transition transform active:scale-95">
                     Start Scanner
                 </button>
             </div>
 
-            <div class="bg-gray-900 rounded-2xl relative aspect-video flex items-center justify-center overflow-hidden shadow-inner">
-                <video id="video-stream" class="w-full h-full object-cover"></video>
+            <!-- Viewfinder Layer Layout Grid Container -->
+            <div class="bg-gray-950 rounded-2xl relative aspect-video flex items-center justify-center overflow-hidden shadow-inner">
+                <video id="video-stream" class="w-full h-full object-cover" playsinline></video>
+                
+                <!-- System Cover Layer -->
                 <div id="video-mask" class="absolute inset-0 z-20 bg-gray-900 flex flex-col items-center justify-center p-6 text-center space-y-2">
-                    <div class="h-11 w-11 bg-gray-800 rounded-2xl flex items-center justify-center text-xl text-gray-400">📸</div>
-                    <p class="text-xs font-bold text-gray-200">Camera Lens Idle</p>
-                    <p class="text-[10px] text-gray-500 max-w-[220px]">Click start to activate the physical scanner arrays over secure HTTPS links.</p>
+                    <div class="h-12 w-12 bg-gray-800 rounded-2xl flex items-center justify-center text-xl text-gray-400 shadow-md">📷</div>
+                    <p class="text-xs font-bold text-gray-200">Camera Lens Standby</p>
+                    <p class="text-[10px] text-gray-500 max-w-[220px]">Click start to grant application permissions and launch the smart scanner interface.</p>
                 </div>
-                <div id="laser-hud" class="absolute inset-x-0 top-1/2 h-[2px] bg-red-500 laser-glow z-10 hidden animate-pulse"></div>
+
+                <!-- Sleek Laser Line Overlay Indicator HUD -->
+                <div id="laser-hud" class="absolute inset-x-4 top-1/2 h-[2px] bg-emerald-400 laser-glow z-10 hidden animate-pulse"></div>
             </div>
             
-            <div id="scan-feedback" class="bg-gray-50 px-3 py-2.5 text-center text-[11px] font-bold text-gray-500 rounded-xl border border-gray-100">
+            <div id="scan-feedback" class="bg-gray-50 px-4 py-3 text-center text-xs font-bold text-gray-500 rounded-2xl border border-gray-100">
                 Awaiting target barcode alignment...
             </div>
         </section>
 
-        <!-- 2. Manual Keyboard Entry Row -->
-        <section class="bg-white rounded-2xl p-2 border border-gray-100 shadow-sm flex items-center space-x-2">
+        <!-- 2. Manual Keyboard Search Form Row -->
+        <section class="bg-white rounded-2xl p-2.5 border border-gray-100 shadow-sm flex items-center space-x-2">
             <div class="p-2 text-sm text-gray-400">🔍</div>
             <input id="manual-text" type="text" placeholder="Can't scan? Type product name manually..." class="flex-1 bg-transparent px-1 py-1 text-xs font-semibold text-gray-800 placeholder-gray-400 focus:outline-none">
-            <button onclick="pantryApp.addManualItem()" class="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">Add</button>
+            <button onclick="pantryApp.addManualItem()" class="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm">Add</button>
         </section>
 
-        <!-- 3. Current Stock Tracking List -->
-        <section class="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm space-y-3">
+        <!-- 3. Current Stock Tracking Vault Shelf List -->
+        <section class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm space-y-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <span class="text-sm">📋</span>
-                    <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">My Scanned Items</h2>
+                    <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">My Kitchen Pantry</h2>
                 </div>
                 <span id="stock-count" class="bg-gray-100 text-gray-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">0 items</span>
             </div>
             <ul id="stock-list" class="divide-y divide-gray-100 max-h-48 overflow-y-auto"></ul>
         </section>
 
-        <!-- 4. AI Recipe Panel -->
+        <!-- 4. Real AI Recipe Generator Stream Panel -->
         <section class="space-y-3">
             <button onclick="pantryApp.askChefForMeals()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg tracking-wide transition flex items-center justify-center space-x-2">
                 <span>✨</span>
                 <span>Ask AI Chef for Recipes</span>
             </button>
-            <div id="recipe-box" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hidden text-xs leading-relaxed text-gray-700 space-y-2"></div>
+            <div id="recipe-box" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hidden text-xs leading-relaxed text-gray-600 space-y-2"></div>
         </section>
     </main>
 
-    <!-- Connects to your external script controller file directly -->
     <script src="/static/js/app.js"></script>
 </body>
 </html>
