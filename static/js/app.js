@@ -1,21 +1,39 @@
 var codeReader = null;
 var pantryApp = {
     startScan: function() {
-        document.getElementById("video-mask").style.display = "none";
-        document.getElementById("laser-hud").style.display = "block";
-        document.getElementById("cam-btn").innerText = "Scanning...";
-        if (!codeReader) { codeReader = new ZXing.BrowserBarcodeReader(); }
-        codeReader.decodeFromInputVideoDevice(undefined, "video-stream")
-        .then(function(result) { pantryApp.onCaptureSuccess(result.text); })
-        .catch(function(err) { alert("Camera configuration error."); });
+        var btn = document.getElementById("cam-btn");
+        btn.innerText = "Connecting...";
+        
+        // FORCED PERMISSION BUGFIX FOR IPADS: Explictly requests camera track authorization upfront
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function(stream) {
+            // Stop temporary stream track immediately once user authorization allows hardware unlock
+            stream.getTracks().forEach(function(track) { track.stop(); });
+            
+            document.getElementById("video-mask").style.display = "none";
+            document.getElementById("laser-hud").style.display = "block";
+            btn.innerText = "Scanning...";
+            btn.className = "bg-gray-300 text-gray-600 font-extrabold text-[11px] uppercase tracking-widest px-4 py-2 rounded-xl shadow-sm cursor-not-allowed";
+            
+            if (!codeReader) { codeReader = new ZXing.BrowserBarcodeReader(); }
+            codeReader.decodeFromInputVideoDevice(undefined, "video-stream")
+            .then(function(result) { pantryApp.onCaptureSuccess(result.text); })
+            .catch(function(err) { alert("Scanner error occurred during video decoding."); });
+        })
+        .catch(function(err) {
+            btn.innerText = "Start Scanner";
+            alert("Camera link failed: Ensure your iPad link loads over secure HTTPS rows.");
+        });
     },
     onCaptureSuccess: function(barcodeString) {
-        document.getElementById("scan-feedback").innerText = "Captured: " + barcodeString;
+        var feedback = document.getElementById("scan-feedback");
+        feedback.innerText = "Captured: " + barcodeString;
         if (navigator.vibrate) navigator.vibrate(100);
         if (codeReader) { codeReader.reset(); }
         document.getElementById("video-mask").style.display = "flex";
         document.getElementById("laser-hud").style.display = "none";
         document.getElementById("cam-btn").innerText = "Start Scanner";
+        document.getElementById("cam-btn").className = "bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[11px] uppercase tracking-widest px-4 py-2 rounded-xl shadow-md";
         fetch("/api/scan", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -60,7 +78,11 @@ var pantryApp = {
         .then(function(d) {
             var raw = d.recipes || "Error processing prompt sequences.";
             var cleanText = raw.replace(/[*#]/g, "");
-            out.innerHTML = '<div class="font-semibold text-gray-600 space-y-1">' + cleanText + '</div>';
+            var targetWrapper = document.createElement("div");
+            targetWrapper.className = "font-semibold text-gray-600 space-y-1";
+            targetWrapper.innerText = cleanText;
+            out.innerHTML = "";
+            out.appendChild(targetWrapper);
         });
     }
 };
