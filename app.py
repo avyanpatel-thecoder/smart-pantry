@@ -87,7 +87,6 @@ def generate_recipes():
     ingredients = ", ".join(items)
     
     try:
-        # Switched model string to Groq's active developer production model option
         completion = groq_client.chat.completions.create(
             model="openai/gpt-oss-20b",
             messages=[
@@ -99,7 +98,8 @@ def generate_recipes():
             temperature=0.7,
             max_tokens=500
         )
-        ai_response = completion.choices.message.content
+        # FIX: Accessing choices as a list correctly using brackets [0]
+        ai_response = completion.choices[0].message.content
         return jsonify({"recipes": ai_response})
     except Exception as e:
         return jsonify({"recipes": f"AI Chef went on strike: Ensure your GROQ_API_KEY is configured in Render. (Error: {str(e)})"})
