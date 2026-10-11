@@ -7,17 +7,8 @@ from groq import Groq
 app = Flask(__name__)
 DB_FILE = "pantry.db"
 
-# Initialize the Groq client using an environment variable
-# (You will paste your secret GROQ_API_KEY securely inside the Render dashboard)
-# Create an explicit custom http client wrapper to completely ignore the hidden proxy bug
-import httpx
-custom_http_client = httpx.Client(proxies=None) if hasattr(httpx, 'Client') else None
-
-groq_client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),
-    http_client=custom_http_client
-)
-
+# Initialize standard Groq client using our version-locked package
+groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 def init_db():
     with sqlite3.connect(DB_FILE) as conn:
@@ -43,7 +34,6 @@ def scan_barcode():
     if not barcode:
         return jsonify({"error": "No barcode provided"}), 400
 
-    # Query the free Open Food Facts API
     url = f"https://openfoodfacts.org{barcode}.json"
     try:
         response = requests.get(url, timeout=5)
@@ -53,7 +43,6 @@ def scan_barcode():
                 product = res_data.get('product', {})
                 item_name = product.get('product_name', 'Unknown Item')
                 
-                # Save automatically to SQLite database
                 with sqlite3.connect(DB_FILE) as conn:
                     conn.execute("INSERT INTO pantry (barcode, item_name) VALUES (?, ?)", (barcode, item_name))
                 return jsonify({"status": "success", "item_name": item_name})
@@ -98,7 +87,6 @@ def generate_recipes():
     ingredients = ", ".join(items)
     
     try:
-        # Call Meta's Llama 3 model via Groq's super-fast free tier
         completion = groq_client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
