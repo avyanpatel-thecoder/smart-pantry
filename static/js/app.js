@@ -4,10 +4,9 @@ var pantryApp = {
         var btn = document.getElementById("cam-btn");
         btn.innerText = "Connecting...";
         
-        // FORCED PERMISSION BUGFIX FOR IPADS: Explictly requests camera track authorization upfront
+        // Requests explicit video track access
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .then(function(stream) {
-            // Stop temporary stream track immediately once user authorization allows hardware unlock
             stream.getTracks().forEach(function(track) { track.stop(); });
             
             document.getElementById("video-mask").style.display = "none";
@@ -15,14 +14,19 @@ var pantryApp = {
             btn.innerText = "Scanning...";
             btn.className = "bg-gray-300 text-gray-600 font-extrabold text-[11px] uppercase tracking-widest px-4 py-2 rounded-xl shadow-sm cursor-not-allowed";
             
-            if (!codeReader) { codeReader = new ZXing.BrowserBarcodeReader(); }
-            codeReader.decodeFromInputVideoDevice(undefined, "video-stream")
-            .then(function(result) { pantryApp.onCaptureSuccess(result.text); })
-            .catch(function(err) { alert("Scanner error occurred during video decoding."); });
+            // FIXED: Using standard MultiFormatReader for broad browser webcam cross-compatibility
+            if (!codeReader) { codeReader = new ZXing.BrowserMultiFormatReader(); }
+            
+            // FIXED: Explicitly maps the video tag ID string as the destination stream window
+            codeReader.decodeFromVideoDevice(undefined, "video-stream", function(result, err) {
+                if (result) {
+                    pantryApp.onCaptureSuccess(result.text);
+                }
+            });
         })
         .catch(function(err) {
             btn.innerText = "Start Scanner";
-            alert("Camera link failed: Ensure your iPad link loads over secure HTTPS rows.");
+            alert("Hardware stream block: Please verify browser permission overlays.");
         });
     },
     onCaptureSuccess: function(barcodeString) {
@@ -30,10 +34,12 @@ var pantryApp = {
         feedback.innerText = "Captured: " + barcodeString;
         if (navigator.vibrate) navigator.vibrate(100);
         if (codeReader) { codeReader.reset(); }
+        
         document.getElementById("video-mask").style.display = "flex";
         document.getElementById("laser-hud").style.display = "none";
         document.getElementById("cam-btn").innerText = "Start Scanner";
         document.getElementById("cam-btn").className = "bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[11px] uppercase tracking-widest px-4 py-2 rounded-xl shadow-md";
+        
         fetch("/api/scan", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
